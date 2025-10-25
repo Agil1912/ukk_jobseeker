@@ -1,65 +1,87 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { hrdService } from "@/lib/services/hrd.service"
-import { toast } from "sonner"
-import { Building2, Edit } from "lucide-react"
-import type { HRD } from "@/lib/types"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { hrdService } from "@/lib/services/hrd.service";
+import { toast } from "sonner";
+import { Building2, Edit } from "lucide-react";
+import type { User, Company } from "@/lib/api";
 
 export default function HRDProfilePage() {
-  const [profile, setProfile] = useState<HRD | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const [user, setUser] = useState<User | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [formData, setFormData] = useState({
-    companyName: "",
-    companyAddress: "",
-    companyDescription: "",
-  })
+    name: "",
+    address: "",
+    phone: "",
+    description: "",
+  });
 
   useEffect(() => {
-    loadProfile()
-  }, [])
+    loadProfile();
+  }, []);
 
   const loadProfile = async () => {
     try {
-      const data = await hrdService.getProfile()
-      setProfile(data)
-      setFormData({
-        companyName: data.companyName,
-        companyAddress: data.companyAddress || "",
-        companyDescription: data.companyDescription || "",
-      })
+      const data = await hrdService.getProfile();
+      setUser(data.user);
+      setCompany(data.company);
+      if (data.company) {
+        setFormData({
+          name: data.company.name,
+          address: data.company.address || "",
+          phone: data.company.phone || "",
+          description: data.company.description || "",
+        });
+      }
     } catch (error) {
-      toast.error("Gagal memuat profil perusahaan")
+      toast.error("Gagal memuat profil perusahaan");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    try {
-      await hrdService.updateProfile(formData)
-      toast.success("Profil perusahaan berhasil diperbarui")
-      setIsEditing(false)
-      loadProfile()
-    } catch (error) {
-      toast.error("Gagal memperbarui profil")
-    } finally {
-      setSaving(false)
+    e.preventDefault();
+    if (!company) {
+      toast.error("Data perusahaan tidak ditemukan");
+      return;
     }
-  }
+    setSaving(true);
+    try {
+      await hrdService.updateCompany(company.id, formData);
+      toast.success("Profil perusahaan berhasil diperbarui");
+      setIsEditing(false);
+      loadProfile();
+    } catch (error) {
+      toast.error("Gagal memperbarui profil");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -71,7 +93,7 @@ export default function HRDProfilePage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -95,8 +117,21 @@ export default function HRDProfilePage() {
                   <Label htmlFor="companyName">Nama Perusahaan</Label>
                   <Input
                     id="companyName"
-                    value={formData.companyName}
-                    onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyPhone">Telepon Perusahaan</Label>
+                  <Input
+                    id="companyPhone"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -104,22 +139,32 @@ export default function HRDProfilePage() {
                   <Label htmlFor="companyAddress">Alamat Perusahaan</Label>
                   <Input
                     id="companyAddress"
-                    value={formData.companyAddress}
-                    onChange={(e) => setFormData({ ...formData, companyAddress: e.target.value })}
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companyDescription">Deskripsi Perusahaan</Label>
+                  <Label htmlFor="companyDescription">
+                    Deskripsi Perusahaan
+                  </Label>
                   <Textarea
                     id="companyDescription"
-                    value={formData.companyDescription}
-                    onChange={(e) => setFormData({ ...formData, companyDescription: e.target.value })}
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     rows={5}
                     placeholder="Ceritakan tentang perusahaan Anda..."
                   />
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                  >
                     Batal
                   </Button>
                   <Button type="submit" disabled={saving}>
@@ -138,32 +183,47 @@ export default function HRDProfilePage() {
                 <Building2 className="h-8 w-8 text-primary-foreground" />
               </div>
               <div>
-                <CardTitle className="text-2xl">{profile?.companyName}</CardTitle>
-                <CardDescription>{profile?.email}</CardDescription>
+                <CardTitle className="text-2xl">
+                  {company?.name || "Perusahaan"}
+                </CardTitle>
+                <CardDescription>{user?.email}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {profile?.companyAddress && (
+            {company?.phone && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Alamat</p>
-                <p>{profile.companyAddress}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Telepon
+                </p>
+                <p>{company.phone}</p>
               </div>
             )}
-            {profile?.companyDescription && (
+            {company?.address && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Deskripsi</p>
-                <p className="text-pretty">{profile.companyDescription}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Alamat
+                </p>
+                <p>{company.address}</p>
               </div>
             )}
-            {!profile?.companyAddress && !profile?.companyDescription && (
+            {company?.description && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Deskripsi
+                </p>
+                <p className="text-pretty">{company.description}</p>
+              </div>
+            )}
+            {!company?.address && !company?.description && (
               <p className="text-muted-foreground text-center py-8">
-                Lengkapi profil perusahaan Anda untuk menarik lebih banyak kandidat
+                Lengkapi profil perusahaan Anda untuk menarik lebih banyak
+                kandidat
               </p>
             )}
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

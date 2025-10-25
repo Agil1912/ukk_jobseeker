@@ -1,42 +1,65 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { jobSeekerService } from "@/lib/services/jobseeker.service"
-import { toast } from "sonner"
-import { FileText, Building2, MapPin, Calendar, Clock } from "lucide-react"
-import type { Application } from "@/lib/types"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { jobSeekerService } from "@/lib/services/jobseeker.service";
+import { toast } from "sonner";
+import { FileText, Building2, MapPin, Calendar, Clock } from "lucide-react";
+import type {
+  PositionApplied,
+  AvailablePosition,
+  Company,
+  User,
+} from "@/lib/api";
+
+interface ApplicationWithDetails extends PositionApplied {
+  position?: AvailablePosition & {
+    company?: Company & {
+      user?: User;
+    };
+  };
+}
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([])
-  const [loading, setLoading] = useState(true)
+  const [applications, setApplications] = useState<ApplicationWithDetails[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadApplications()
-  }, [])
+    loadApplications();
+  }, []);
 
   const loadApplications = async () => {
     try {
-      const data = await jobSeekerService.getMyApplications()
-      setApplications(data)
+      const data = await jobSeekerService.getMyApplications();
+      setApplications(data);
     } catch (error) {
-      toast.error("Gagal memuat histori lamaran")
+      toast.error("Gagal memuat histori lamaran");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "accepted":
-        return <Badge className="bg-success text-success-foreground">Diterima</Badge>
+        return (
+          <Badge className="bg-success text-success-foreground">Diterima</Badge>
+        );
       case "rejected":
-        return <Badge variant="destructive">Ditolak</Badge>
+        return <Badge variant="destructive">Ditolak</Badge>;
       default:
-        return <Badge variant="secondary">Menunggu</Badge>
+        return <Badge variant="secondary">Menunggu</Badge>;
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -48,7 +71,7 @@ export default function ApplicationsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -56,7 +79,9 @@ export default function ApplicationsPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">Histori Lamaran</h1>
-          <p className="text-muted-foreground">Lacak status lamaran pekerjaan Anda</p>
+          <p className="text-muted-foreground">
+            Lacak status lamaran pekerjaan Anda
+          </p>
         </div>
 
         {applications.length === 0 ? (
@@ -73,34 +98,52 @@ export default function ApplicationsPage() {
                 <CardHeader>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="mb-2">{getStatusBadge(application.status)}</div>
-                      <CardTitle className="text-xl mb-2">{application.job?.position}</CardTitle>
+                      <div className="mb-2">
+                        {getStatusBadge(application.status)}
+                      </div>
+                      <CardTitle className="text-xl mb-2">
+                        {application.position?.position_name ||
+                          "Posisi tidak tersedia"}
+                      </CardTitle>
                       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Building2 className="h-4 w-4" />
-                          {application.job?.companyName}
+                          {application.position?.company?.name || "Perusahaan"}
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          {application.job?.location}
+                          {application.position?.company?.address ||
+                            "Lokasi tidak tersedia"}
                         </div>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {application.job?.description && (
-                    <CardDescription className="mb-4 text-pretty">{application.job.description}</CardDescription>
+                  {application.position?.description && (
+                    <CardDescription className="mb-4 text-pretty">
+                      {application.position.description}
+                    </CardDescription>
                   )}
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      <span>Dilamar: {new Date(application.appliedAt).toLocaleDateString("id-ID")}</span>
+                      <span>
+                        Dilamar:{" "}
+                        {new Date(application.apply_date).toLocaleDateString(
+                          "id-ID"
+                        )}
+                      </span>
                     </div>
-                    {application.job?.endDate && (
+                    {application.position?.submission_end_date && (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        <span>Berakhir: {new Date(application.job.endDate).toLocaleDateString("id-ID")}</span>
+                        <span>
+                          Berakhir:{" "}
+                          {new Date(
+                            application.position.submission_end_date
+                          ).toLocaleDateString("id-ID")}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -111,5 +154,5 @@ export default function ApplicationsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

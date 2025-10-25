@@ -1,45 +1,51 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { hrdService } from "@/lib/services/hrd.service"
-import { toast } from "sonner"
-import { Plus, Briefcase, MapPin, Calendar, Edit, Trash2 } from "lucide-react"
-import type { Job } from "@/lib/types"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { hrdService } from "@/lib/services/hrd.service";
+import { toast } from "sonner";
+import { Plus, Briefcase, MapPin, Calendar, Edit, Trash2 } from "lucide-react";
+import type { AvailablePosition } from "@/lib/api";
 
 export default function HRDJobsPage() {
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [loading, setLoading] = useState(true)
+  const [jobs, setJobs] = useState<AvailablePosition[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadJobs()
-  }, [])
+    loadJobs();
+  }, []);
 
   const loadJobs = async () => {
     try {
-      const data = await hrdService.getMyJobs()
-      setJobs(data)
+      const data = await hrdService.getMyJobs();
+      setJobs(data);
     } catch (error) {
-      toast.error("Gagal memuat lowongan kerja")
+      toast.error("Gagal memuat lowongan kerja");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus lowongan ini?")) return
+    if (!confirm("Apakah Anda yakin ingin menghapus lowongan ini?")) return;
 
     try {
-      await hrdService.deleteJob(id)
-      toast.success("Lowongan berhasil dihapus")
-      loadJobs()
+      await hrdService.deleteJob(id);
+      toast.success("Lowongan berhasil dihapus");
+      loadJobs();
     } catch (error) {
-      toast.error("Gagal menghapus lowongan")
+      toast.error("Gagal menghapus lowongan");
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -49,7 +55,7 @@ export default function HRDJobsPage() {
           <div className="h-64 bg-muted rounded"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -58,7 +64,9 @@ export default function HRDJobsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Kelola Lowongan</h1>
-            <p className="text-muted-foreground">Kelola semua lowongan pekerjaan perusahaan Anda</p>
+            <p className="text-muted-foreground">
+              Kelola semua lowongan pekerjaan perusahaan Anda
+            </p>
           </div>
           <Button asChild>
             <Link href="/hrd/jobs/new">
@@ -80,50 +88,76 @@ export default function HRDJobsPage() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {jobs.map((job) => (
-              <Card key={job.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant={job.isActive ? "secondary" : "outline"}>
-                          {job.isActive ? "Aktif" : "Tidak Aktif"}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-xl mb-2">{job.position}</CardTitle>
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {job.location}
+            {jobs.map((job) => {
+              const endDate = new Date(job.submission_end_date);
+              const isActive = endDate >= new Date();
+
+              return (
+                <Card key={job.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant={isActive ? "secondary" : "outline"}>
+                            {isActive ? "Aktif" : "Tidak Aktif"}
+                          </Badge>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(job.startDate).toLocaleDateString("id-ID")} -{" "}
-                          {new Date(job.endDate).toLocaleDateString("id-ID")}
+                        <CardTitle className="text-xl mb-2">
+                          {job.position_name}
+                        </CardTitle>
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {job.company?.address || "Lokasi tidak tersedia"}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(
+                              job.submission_start_date
+                            ).toLocaleDateString("id-ID")}{" "}
+                            -{" "}
+                            {new Date(
+                              job.submission_end_date
+                            ).toLocaleDateString("id-ID")}
+                          </div>
+                          {job.salary && (
+                            <div className="flex items-center gap-1">
+                              <span className="font-semibold">💰</span>
+                              Rp {job.salary.toLocaleString("id-ID")}
+                            </div>
+                          )}
                         </div>
+                        <CardDescription className="text-pretty">
+                          {job.description}
+                        </CardDescription>
                       </div>
-                      <CardDescription className="text-pretty">{job.description}</CardDescription>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="icon" asChild>
+                          <Link href={`/hrd/jobs/${job.id}/edit`}>
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDelete(job.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                        <Button asChild>
+                          <Link href={`/hrd/jobs/${job.id}`}>
+                            Lihat Pelamar
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="icon" asChild>
-                        <Link href={`/hrd/jobs/${job.id}/edit`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button variant="outline" size="icon" onClick={() => handleDelete(job.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                      <Button asChild>
-                        <Link href={`/hrd/jobs/${job.id}`}>Lihat Pelamar</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
+                  </CardHeader>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

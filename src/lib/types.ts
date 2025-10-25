@@ -1,90 +1,46 @@
-// User Types
-export interface User {
-  id: string
-  email: string
-  name: string
-  role: "JOBSEEKER" | "HRD"
-  createdAt: string
-}
+// Re-export all types from api.ts for backwards compatibility
+import type { User } from "./api";
 
-export interface JobSeeker extends User {
-  role: "JOBSEEKER"
-  phone?: string
-  address?: string
-  skills?: string[]
-  bio?: string
-  portfolio?: Portfolio[]
-}
+export type {
+  User,
+  Company,
+  Society,
+  Portfolio,
+  AvailablePosition,
+  PositionApplied,
+  ApiResponse,
+} from "./api";
 
-export interface HRD extends User {
-  role: "HRD"
-  companyName: string
-  companyAddress?: string
-  companyDescription?: string
-}
+// Legacy type aliases for compatibility with existing code
+export type { User as JobSeeker, User as HRD } from "./api";
+export type { AvailablePosition as Job } from "./api";
+export type { PositionApplied as Application } from "./api";
 
-// Portfolio
-export interface Portfolio {
-  id: string
-  title: string
-  description: string
-  link?: string
-  fileUrl?: string
-  createdAt: string
-}
-
-// Job
-export interface Job {
-  id: string
-  hrdId: string
-  companyName: string
-  position: string
-  description: string
-  location: string
-  salary?: string
-  requirements?: string
-  startDate: string
-  endDate: string
-  isActive: boolean
-  createdAt: string
-}
-
-// Application
-export interface Application {
-  id: string
-  jobId: string
-  jobSeekerId: string
-  status: "pending" | "accepted" | "rejected"
-  appliedAt: string
-  job?: Job
-  jobSeeker?: JobSeeker
-}
-
-// Auth
+// Auth types
 export interface LoginRequest {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface RegisterJobSeekerRequest {
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
 
 export interface RegisterHRDRequest {
-  companyName: string
-  email: string
-  password: string
-  confirmPassword: string
-  companyAddress?: string
-  companyDescription?: string
+  companyName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  companyAddress?: string;
+  companyDescription?: string;
 }
 
 export interface AuthResponse {
-  token: string
-  role: string
-  success: boolean
-  user: User
+  token: string;
+  role: string;
+  success: boolean;
+  user: User;
 }

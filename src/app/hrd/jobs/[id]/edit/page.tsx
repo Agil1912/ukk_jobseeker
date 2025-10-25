@@ -1,76 +1,90 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { hrdService } from "@/lib/services/hrd.service"
-import { toast } from "sonner"
-import { ArrowLeft } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { hrdService } from "@/lib/services/hrd.service";
+import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 export default function EditJobPage() {
-  const params = useParams()
-  const router = useRouter()
-  const jobId = params.id as string
+  const params = useParams();
+  const router = useRouter();
+  const jobId = params.id as string;
 
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    position: "",
+    position_name: "",
     description: "",
-    location: "",
+    capacity: "",
     salary: "",
-    requirements: "",
-    startDate: "",
-    endDate: "",
-  })
+    submission_start_date: "",
+    submission_end_date: "",
+  });
 
   useEffect(() => {
-    loadJob()
-  }, [jobId])
+    loadJob();
+  }, [jobId]);
 
   const loadJob = async () => {
     try {
-      const jobs = await hrdService.getMyJobs()
-      const job = jobs.find((j) => j.id === jobId)
+      const jobs = await hrdService.getMyJobs();
+      const job = jobs.find((j) => j.id === jobId);
       if (job) {
         setFormData({
-          position: job.position,
+          position_name: job.position_name,
           description: job.description,
-          location: job.location,
-          salary: job.salary || "",
-          requirements: job.requirements || "",
-          startDate: job.startDate.split("T")[0],
-          endDate: job.endDate.split("T")[0],
-        })
+          capacity: job.capacity.toString(),
+          salary: job.salary ? job.salary.toString() : "",
+          submission_start_date: job.submission_start_date.split("T")[0],
+          submission_end_date: job.submission_end_date.split("T")[0],
+        });
       }
     } catch (error) {
-      toast.error("Gagal memuat data lowongan")
+      toast.error("Gagal memuat data lowongan");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
+    e.preventDefault();
+    setSaving(true);
 
     try {
-      await hrdService.updateJob(jobId, formData)
-      toast.success("Lowongan berhasil diperbarui")
-      router.push("/hrd/jobs")
+      // Convert capacity and salary to number
+      const jobData = {
+        position_name: formData.position_name,
+        description: formData.description,
+        capacity: parseInt(formData.capacity),
+        salary: formData.salary ? parseInt(formData.salary) : undefined,
+        submission_start_date: formData.submission_start_date,
+        submission_end_date: formData.submission_end_date,
+      };
+
+      await hrdService.updateJob(jobId, jobData);
+      toast.success("Lowongan berhasil diperbarui");
+      router.push("/hrd/jobs");
     } catch (error) {
-      toast.error("Gagal memperbarui lowongan")
+      toast.error("Gagal memperbarui lowongan");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -82,7 +96,7 @@ export default function EditJobPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -96,7 +110,9 @@ export default function EditJobPage() {
             </Link>
           </Button>
           <h1 className="text-3xl font-bold">Edit Lowongan</h1>
-          <p className="text-muted-foreground mt-2">Perbarui informasi lowongan pekerjaan</p>
+          <p className="text-muted-foreground mt-2">
+            Perbarui informasi lowongan pekerjaan
+          </p>
         </div>
 
         <Card>
@@ -111,8 +127,10 @@ export default function EditJobPage() {
                 <Input
                   id="position"
                   placeholder="Contoh: Frontend Developer"
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                  value={formData.position_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, position_name: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -123,72 +141,83 @@ export default function EditJobPage() {
                   id="description"
                   placeholder="Jelaskan tentang pekerjaan ini..."
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   rows={4}
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Lokasi</Label>
-                  <Input
-                    id="location"
-                    placeholder="Contoh: Jakarta"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="salary">Gaji (Opsional)</Label>
-                  <Input
-                    id="salary"
-                    placeholder="Contoh: Rp 5.000.000 - 8.000.000"
-                    value={formData.salary}
-                    onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="capacity">Kapasitas/Jumlah Lowongan</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  min="1"
+                  placeholder="Contoh: 5"
+                  value={formData.capacity}
+                  onChange={(e) =>
+                    setFormData({ ...formData, capacity: e.target.value })
+                  }
+                  required
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="requirements">Persyaratan (Opsional)</Label>
-                <Textarea
-                  id="requirements"
-                  placeholder="Tuliskan persyaratan untuk posisi ini..."
-                  value={formData.requirements}
-                  onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                  rows={3}
+                <Label htmlFor="salary">Gaji (Opsional)</Label>
+                <Input
+                  id="salary"
+                  type="number"
+                  placeholder="Contoh: 5000000"
+                  value={formData.salary}
+                  onChange={(e) =>
+                    setFormData({ ...formData, salary: e.target.value })
+                  }
+                  min="0"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">Tanggal Mulai</Label>
+                  <Label htmlFor="startDate">Tanggal Mulai Pendaftaran</Label>
                   <Input
                     id="startDate"
                     type="date"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    value={formData.submission_start_date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        submission_start_date: e.target.value,
+                      })
+                    }
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">Tanggal Berakhir</Label>
+                  <Label htmlFor="endDate">Tanggal Berakhir Pendaftaran</Label>
                   <Input
                     id="endDate"
                     type="date"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    value={formData.submission_end_date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        submission_end_date: e.target.value,
+                      })
+                    }
                     required
                   />
                 </div>
               </div>
 
               <div className="flex gap-2 justify-end pt-4">
-                <Button type="button" variant="outline" onClick={() => router.back()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                >
                   Batal
                 </Button>
                 <Button type="submit" disabled={saving}>
@@ -200,6 +229,5 @@ export default function EditJobPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

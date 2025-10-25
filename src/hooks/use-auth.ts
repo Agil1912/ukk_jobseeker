@@ -1,31 +1,16 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { authService } from "@/lib/auth"
-import type { User } from "@/lib/types"
+import { useAuth as useAuthContext } from "@/contexts/AuthContext";
 
 export function useAuth() {
-  const [user, setUser] = useState<any | null>(null)
-  const [loading, setLoading] = useState(true)
-    
-useEffect(() => {
-    const currentUserRole = localStorage.getItem("role") 
-    console.log("Current user:", currentUserRole)
-    setUser(currentUserRole)
-    setLoading(false)
-}, [])
-
-  const logout = () => {
-    authService.logout()
-    setUser(null)
-  }
+  const { user, isLoading, isAuthenticated, logout } = useAuthContext();
 
   return {
     user,
-    loading,
-    isAuthenticated: !!user,
-    isJobSeeker: user === "JOBSEEKER",
-    isHRD: user === "HRD",
+    loading: isLoading,
+    isAuthenticated,
+    isJobSeeker: user?.role === "Society",
+    isHRD: user?.role === "HRD",
     logout,
-  }
+  };
 }
