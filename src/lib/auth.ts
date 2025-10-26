@@ -4,38 +4,48 @@ import type { LoginRequest, RegisterJobSeekerRequest, RegisterHRDRequest, AuthRe
 export const authService = {
   // Login
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>("/auth/login", data)
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token)
-      localStorage.setItem("user", JSON.stringify(response.data.user))
-      document.cookie = `token=${response.data.token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
-      document.cookie = `role=${response.data.user.role}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
+    const response = await api.user.login(data)
+    if (response.data?.token && response.data?.user) {
+      return {
+        token: response.data.token,
+        user: response.data.user,
+        role: response.data.user.role,
+        success: true
+      }
     }
-    return response.data
+    throw new Error(response.message || "Login failed")
   },
 
   // Register Job Seeker
   async registerJobSeeker(data: RegisterJobSeekerRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>("/auth/register/jobseeker", data)
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token)
-      localStorage.setItem("user", JSON.stringify(response.data.user))
-      document.cookie = `token=${response.data.token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
-      document.cookie = `role=${response.data.user.role}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
+    const formData = new FormData()
+    formData.append("name", data.name)
+    formData.append("email", data.email)
+    formData.append("password", data.password)
+    formData.append("role", "Society")
+    
+    const response = await api.user.register(formData)
+    if (response.data) {
+      // After registration, login automatically
+      return this.login({ email: data.email, password: data.password })
     }
-    return response.data
+    throw new Error(response.message || "Registration failed")
   },
 
   // Register HRD
   async registerHRD(data: RegisterHRDRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>("/auth/register/hrd", data)
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token)
-      localStorage.setItem("user", JSON.stringify(response.data.user))
-      document.cookie = `token=${response.data.token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
-      document.cookie = `role=${response.data.user.role}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
+    const formData = new FormData()
+    formData.append("name", data.companyName)
+    formData.append("email", data.email)
+    formData.append("password", data.password)
+    formData.append("role", "HRD")
+    
+    const response = await api.user.register(formData)
+    if (response.data) {
+      // After registration, login automatically
+      return this.login({ email: data.email, password: data.password })
     }
-    return response.data
+    throw new Error(response.message || "Registration failed")
   },
 
   // Logout
