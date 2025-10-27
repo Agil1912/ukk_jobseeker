@@ -75,7 +75,7 @@ export default function LoginPage() {
               <Briefcase className="h-6 w-6 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Masuk ke JobSeeker</CardTitle>
+          <CardTitle className="text-2xl">Masuk ke Kerjain</CardTitle>
           <CardDescription>
             Masukkan email dan password Anda untuk melanjutkan
           </CardDescription>

@@ -36,7 +36,7 @@ export function Navbar() {
             className="flex items-center gap-2 font-bold text-xl text-primary"
           >
             <Briefcase className="h-6 w-6" />
-            <span>JobSeeker</span>
+            <span>Kerjain</span>
           </Link>
 
           <div className="flex items-center gap-4">
