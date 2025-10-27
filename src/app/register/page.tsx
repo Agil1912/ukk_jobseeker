@@ -246,7 +246,7 @@ export default function RegisterPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="js-password">Password</Label>
+                    <Label htmlFor="js-password">Password {"(minimal 8 karakter & string)"}</Label>
                     <Input
                       id="js-password"
                       type="password"
