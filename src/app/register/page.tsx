@@ -250,7 +250,7 @@ export default function RegisterPage() {
                           gender: e.target.value as "male" | "female",
                         })
                       }
-                      className="flex h-10 w-full rounded-md border-2 border-orange-200 bg-gray-950 px-3 py-2 text-sm font-semibold focus:border-orange-500 focus:ring-2 focus:ring-orange-500"
+                      className="flex h-10 w-full rounded-md border-2 border-orange-200 bg-white px-3 py-2 text-sm font-semibold text-gray-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500"
                       required
                     >
                       <option value="male">Laki-laki</option>
@@ -473,7 +473,7 @@ export default function RegisterPage() {
                       })
                     }
                     rows={3}
-                    className="border-2 border-green-200 focus:border-green-500 focus:ring-green-500"
+                    className="border-2 border-green-200 bg-white focus:border-green-500 focus:ring-green-500"
                   />
                 </div>
                 <Button

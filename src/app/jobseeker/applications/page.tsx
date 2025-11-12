@@ -85,8 +85,9 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gradient-to-br from-blue-50 via-green-50 to-orange-50 min-h-screen">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-orange-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6"></div>
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-8 text-white shadow-lg">
           <h1 className="text-4xl font-black mb-2">Histori Lamaran</h1>
           <p className="text-blue-100 font-semibold text-lg">
@@ -116,7 +117,9 @@ export default function ApplicationsPage() {
                 <CardHeader className="bg-gradient-to-r from-blue-50 via-green-50 to-orange-50 border-b-2 border-blue-200">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="mb-3">{getStatusBadge(application.status)}</div>
+                      <div className="mb-3">
+                        {getStatusBadge(application.status)}
+                      </div>
                       <CardTitle className="text-2xl mb-3 font-black text-gray-800">
                         {application.position?.position_name ||
                           "Posisi tidak tersedia"}
