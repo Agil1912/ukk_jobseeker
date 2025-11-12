@@ -102,7 +102,7 @@ export default function HRDProfilePage() {
         {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 via-orange-500 to-green-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-extrabold  bg-orange-500  bg-clip-text text-transparent">
               Profil Perusahaan
             </h1>
             <p className="text-gray-600 font-semibold mt-2">
@@ -118,7 +118,7 @@ export default function HRDProfilePage() {
             </DialogTrigger>
             <DialogContent className="max-w-2xl bg-white">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
+                <DialogTitle className="text-2xl font-extrabold  bg-orange-500 bg-clip-text text-transparent">
                   Edit Profil Perusahaan
                 </DialogTitle>
               </DialogHeader>
@@ -196,7 +196,7 @@ export default function HRDProfilePage() {
                     type="button"
                     variant="outline"
                     onClick={() => setIsEditing(false)}
-                    className="font-bold border-2 border-gray-300"
+                    className="font-bold border-2 bg-gray-700  border-gray-300"
                   >
                     Batal
                   </Button>
@@ -216,7 +216,7 @@ export default function HRDProfilePage() {
         {/* Profile Card */}
         <Card className="border-0 shadow-xl overflow-hidden bg-white">
           {/* Header Gradient */}
-          <div className="h-32 bg-gradient-to-r from-blue-600 via-orange-500 to-green-500"></div>
+          <div className="h-32  bg-orange-500 "></div>
 
           <CardHeader className="relative pb-8">
             <div className="flex items-end gap-6">
