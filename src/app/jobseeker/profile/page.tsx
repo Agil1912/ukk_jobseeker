@@ -237,7 +237,7 @@ export default function ProfilePage() {
                   Edit Profil
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white text-black">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-blue-600">
                     Edit Profil
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                           type="button"
                           variant="outline"
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full border-2 border-orange-500 text-orange-600 hover:bg-orange-50 font-bold"
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold border-0"
                         >
                           <Upload className="mr-2 h-4 w-4" />
                           {selectedImage ? "Ganti Foto" : "Upload Foto"}
@@ -374,14 +374,13 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex gap-2 justify-end pt-4">
                     <Button
-                      type="button"
                       variant="outline"
                       onClick={() => {
                         setIsEditingProfile(false);
                         setSelectedImage(null);
                         setImagePreview(user?.image || null);
                       }}
-                      className="font-bold border-2 border-gray-400"
+                      className="font-bold bg-gray-300 hover:bg-gray-400 text-gray-800 border-0"
                     >
                       Batal
                     </Button>
@@ -471,7 +470,7 @@ export default function ProfilePage() {
           {/* Portfolio Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-black flex items-center gap-3 text-orange-600">
+              <h2 className="text-3xl  font-black flex items-center gap-3 text-orange-600">
                 <div className="bg-orange-600 p-2 rounded-lg">
                   <Briefcase className="h-6 w-6 text-white" />
                 </div>
@@ -487,7 +486,7 @@ export default function ProfilePage() {
                     Tambah Portfolio
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-white">
                   <DialogHeader>
                     <DialogTitle className="text-2xl font-black text-orange-600">
                       Tambah Portfolio
@@ -556,7 +555,7 @@ export default function ProfilePage() {
                         accept="image/*,.pdf"
                         className="border-2 border-gray-300 focus:border-orange-500 font-bold"
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground text-gray-500">
                         Gambar atau PDF. Maksimal 5MB.
                       </p>
                     </div>
@@ -572,7 +571,7 @@ export default function ProfilePage() {
                             file: null,
                           });
                         }}
-                        className="font-bold border-2 border-gray-400"
+                        className=" bg-gray-500 font-bold border-2 border-gray-400"
                       >
                         Batal
                       </Button>

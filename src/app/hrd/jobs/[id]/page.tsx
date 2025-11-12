@@ -303,7 +303,7 @@ export default function JobApplicationsPage() {
                           ) => handleStatusChange(application.id, value)}
                           disabled={updating === application.id}
                         >
-                          <SelectTrigger className="w-[180px] border-2 border-orange-400 font-bold text-orange-700">
+                          <SelectTrigger className="w-[180px] border-2 bg-orange-500 border-orange-400 font-bold text-white">
                             <SelectValue placeholder="Ubah Status" />
                           </SelectTrigger>
                           <SelectContent>
@@ -326,7 +326,7 @@ export default function JobApplicationsPage() {
             onOpenChange={() => setSelectedApplicant(null)}
           >
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-blue-50 to-green-50">
-              <DialogHeader className="bg-gradient-to-r from-blue-500 via-orange-500 to-green-500 text-white rounded-lg p-4 -m-6 mb-4">
+              <DialogHeader className=" bg-orange-500  text-white rounded-lg p-4 -m-6 mb-4">
                 <DialogTitle className="text-2xl font-bold">
                   Detail Pelamar
                 </DialogTitle>
