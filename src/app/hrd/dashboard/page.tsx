@@ -13,6 +13,9 @@ import {
   XCircle,
   Plus,
   Building2,
+  TrendingUp,
+  Eye,
+  Edit3,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -62,26 +65,19 @@ export default function HRDDashboard() {
           return;
         }
 
-        // Fetch company profile
         const companyResponse = await companyAPI.getById(companyId);
-
-        // Fetch all applications for this company
         const applicationsResponse =
           await applicationAPI.getCompanyApplications();
-
-        // Fetch all available positions to get full position details
         const positionsResponse = await applicationAPI.getAll();
 
         if (companyResponse.success && companyResponse.data) {
           const company = companyResponse.data;
 
-          // Set applications from the dedicated endpoint
           if (applicationsResponse.success && applicationsResponse.data) {
             const applicationsData = applicationsResponse.data;
             setApplications(applicationsData);
           }
 
-          // Filter positions by company and attach applications
           if (positionsResponse.success && positionsResponse.data) {
             const applicationsData =
               applicationsResponse.success && applicationsResponse.data
@@ -132,7 +128,6 @@ export default function HRDDashboard() {
           }`
         );
 
-        // Refresh data
         const companyId = user?.company?.id;
         if (companyId) {
           const companyResponse = await companyAPI.getById(companyId);
@@ -143,13 +138,11 @@ export default function HRDDashboard() {
           if (companyResponse.success && companyResponse.data) {
             const company = companyResponse.data;
 
-            // Update applications state
             if (applicationsResponse.success && applicationsResponse.data) {
               const applicationsData = applicationsResponse.data;
               setApplications(applicationsData);
             }
 
-            // Update positions with refreshed applications
             if (positionsResponse.success && positionsResponse.data) {
               const applicationsData =
                 applicationsResponse.success && applicationsResponse.data
@@ -181,15 +174,16 @@ export default function HRDDashboard() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8">
-        <p className="text-center">Memuat data...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-semibold">Memuat data...</p>
+        </div>
       </div>
     );
   }
 
   const positions = companyData?.available_positions ?? [];
-
-  // Use applications from the dedicated endpoint
   const pendingApplications = (applications || []).filter(
     (app) => app.status === "PENDING"
   );
@@ -201,372 +195,335 @@ export default function HRDDashboard() {
   );
 
   return (
-    <div className="container mx-auto space-y-6 py-8">
-      {/* Welcome Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard HRD</h1>
-          <p className="text-muted-foreground">
-            Selamat datang, {companyData?.name ?? user?.name}!
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/hrd/dashboard/edit-company">
-              <Building2 className="mr-2 h-4 w-4" />
-              Edit Profil Perusahaan
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/hrd/dashboard/post-job">
-              <Plus className="mr-2 h-4 w-4" />
-              Buat Lowongan
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      {/* Company Info Card */}
-      {companyData && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               {user?.image && (
                 <Image
                   src={user.image}
-                  alt={companyData.name}
-                  className="h-20 w-20 rounded-lg object-cover"
-                  width={80}
-                  height={80}
+                  alt={companyData?.name ?? "Company"}
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 rounded-full object-cover"
                 />
               )}
-              <div className="flex-1">
-                <h2 className="text-xl font-bold">{companyData.name}</h2>
-                <p className="text-muted-foreground mt-1">
-                  {companyData.address}
-                </p>
-                <p className="text-muted-foreground mt-2 line-clamp-2 text-sm">
-                  {companyData.description}
-                </p>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {companyData?.name ?? "Dashboard"}
+                </h1>
+                <p className="text-sm text-gray-500">HRD Management System</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Lowongan
-            </CardTitle>
-            <Briefcase className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{positions.length}</div>
-            <p className="text-muted-foreground text-xs">Posisi aktif</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Lamaran Pending
-            </CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {pendingApplications.length}
-            </div>
-            <p className="text-muted-foreground text-xs">Perlu direview</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Lamaran Diterima
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {acceptedApplications.length}
-            </div>
-            <p className="text-muted-foreground text-xs">Kandidat lolos</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Lamaran Ditolak
-            </CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {rejectedApplications.length}
-            </div>
-            <p className="text-muted-foreground text-xs">Tidak sesuai</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Positions Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lowongan Pekerjaan</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {positions.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center">
-              <Briefcase className="mx-auto mb-4 h-12 w-12 opacity-50" />
-              <p>Belum ada lowongan pekerjaan</p>
-              <Button className="mt-4" asChild>
-                <Link href="/hrd/dashboard/post-job">
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+                asChild
+              >
+                <Link href="/hrd/jobs/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  Buat Lowongan Pertama
+                  Buat Lowongan
                 </Link>
               </Button>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {positions.map((position) => {
-                const apps = position.position_applied ?? [];
-                const pending = apps.filter(
-                  (a) => a.status === "PENDING"
-                ).length;
-                const accepted = apps.filter(
-                  (a) => a.status === "ACCEPTED"
-                ).length;
-                const rejected = apps.filter(
-                  (a) => a.status === "REJECTED"
-                ).length;
+          </div>
+        </div>
+      </header>
 
-                const endDate = new Date(position.submission_end_date);
-                const isActive = endDate >= new Date();
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Grid */}
+        <div className="grid gap-4 md:grid-cols-4 mb-8">
+          <Card className="bg-white border border-gray-200 hover:border-blue-300 transition-colors">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Total Lowongan
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {positions.length}
+                  </p>
+                </div>
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <Briefcase className="text-blue-600 h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                return (
-                  <Card key={position.id}>
-                    <CardContent className="p-4">
-                      <div className="mb-4 flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="mb-1 flex items-center gap-2">
-                            <h3 className="text-lg font-semibold">
-                              {position.position_name}
-                            </h3>
-                            {isActive ? (
+          <Card className="bg-white border border-gray-200 hover:border-orange-300 transition-colors">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Lamaran Pending
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {pendingApplications.length}
+                  </p>
+                </div>
+                <div className="bg-orange-100 p-3 rounded-lg">
+                  <Clock className="text-orange-600 h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border border-gray-200 hover:border-green-300 transition-colors">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Lamaran Diterima
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {acceptedApplications.length}
+                  </p>
+                </div>
+                <div className="bg-green-100 p-3 rounded-lg">
+                  <CheckCircle className="text-green-600 h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border border-gray-200 hover:border-red-300 transition-colors">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Lamaran Ditolak
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {rejectedApplications.length}
+                  </p>
+                </div>
+                <div className="bg-red-100 p-3 rounded-lg">
+                  <XCircle className="text-red-600 h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Positions Column */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-gray-700" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Lowongan Pekerjaan
+              </h2>
+            </div>
+
+            {positions.length === 0 ? (
+              <Card className="bg-white border border-gray-200 text-center py-12">
+                <Briefcase className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                <p className="text-gray-600 font-medium mb-4">
+                  Belum ada lowongan pekerjaan
+                </p>
+                <Button
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  asChild
+                >
+                  <Link href="/hrd/dashboard/post-job">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Buat Lowongan Pertama
+                  </Link>
+                </Button>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {positions.map((position) => {
+                  const apps = position.position_applied ?? [];
+                  const pending = apps.filter(
+                    (a) => a.status === "PENDING"
+                  ).length;
+                  const accepted = apps.filter(
+                    (a) => a.status === "ACCEPTED"
+                  ).length;
+                  const rejected = apps.filter(
+                    (a) => a.status === "REJECTED"
+                  ).length;
+
+                  const endDate = new Date(position.submission_end_date);
+                  const isActive = endDate >= new Date();
+
+                  return (
+                    <Card
+                      key={position.id}
+                      className="bg-white border border-gray-200 hover:shadow-md transition-shadow"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-gray-900">
+                                {position.position_name}
+                              </h3>
                               <Badge
-                                variant="outline"
-                                className="border-blue-200 bg-blue-50 text-blue-700"
+                                className={`text-xs font-medium ${
+                                  isActive
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
                               >
-                                Aktif
+                                {isActive ? "Aktif" : "Berakhir"}
                               </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              {apps.length} pelamar • {position.capacity} posisi
+                              tersedia
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Berakhir:{" "}
+                              {endDate.toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Badge
+                              variant="secondary"
+                              className="bg-orange-100 text-orange-700"
+                            >
+                              <Clock className="mr-1 h-3 w-3" />
+                              {pending}
+                            </Badge>
+                            <Badge
+                              variant="secondary"
+                              className="bg-green-100 text-green-700"
+                            >
+                              <CheckCircle className="mr-1 h-3 w-3" />
+                              {accepted}
+                            </Badge>
+                            <Badge
+                              variant="secondary"
+                              className="bg-red-100 text-red-700"
+                            >
+                              <XCircle className="mr-1 h-3 w-3" />
+                              {rejected}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Recent Applications Sidebar */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-gray-700" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Lamaran Terbaru
+              </h2>
+            </div>
+
+            {applications.length === 0 ? (
+              <Card className="bg-white border border-gray-200 text-center py-8">
+                <Users className="mx-auto h-10 w-10 text-gray-300 mb-2" />
+                <p className="text-sm text-gray-600">Belum ada lamaran masuk</p>
+              </Card>
+            ) : (
+              <div className="space-y-2">
+                {applications
+                  .sort(
+                    (a, b) =>
+                      new Date(b.apply_date).getTime() -
+                      new Date(a.apply_date).getTime()
+                  )
+                  .slice(0, 8)
+                  .map((application) => (
+                    <Card
+                      key={application.id}
+                      className="bg-white border border-gray-200 hover:border-blue-300 transition-colors"
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex gap-3">
+                          <div className="flex-shrink-0">
+                            {application.society?.user?.image ? (
+                              <Image
+                                src={application.society.user.image}
+                                alt={application.society.name ?? "Applicant"}
+                                width={40}
+                                height={40}
+                                className="h-10 w-10 rounded-full object-cover"
+                              />
                             ) : (
-                              <Badge
-                                variant="outline"
-                                className="border-gray-200 bg-gray-50 text-gray-700"
-                              >
-                                Berakhir
-                              </Badge>
+                              <div className="bg-gray-200 flex h-10 w-10 items-center justify-center rounded-full">
+                                <Users className="text-gray-600 h-5 w-5" />
+                              </div>
                             )}
                           </div>
-                          <p className="text-muted-foreground text-sm">
-                            {apps.length} pelamar • {position.capacity} posisi
-                            tersedia
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            Berakhir:{" "}
-                            {endDate.toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge
-                            variant="outline"
-                            className="border-yellow-200 bg-yellow-50 text-yellow-700"
-                          >
-                            <Clock className="mr-1 h-3 w-3" />
-                            {pending}
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className="border-green-200 bg-green-50 text-green-700"
-                          >
-                            <CheckCircle className="mr-1 h-3 w-3" />
-                            {accepted}
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className="border-red-200 bg-red-50 text-red-700"
-                          >
-                            <XCircle className="mr-1 h-3 w-3" />
-                            {rejected}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/jobs/${position.id}`}>
-                            Lihat Detail
-                          </Link>
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link
-                            href={`/hrd/dashboard/positions/${position.id}/edit`}
-                          >
-                            Edit Lowongan
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Recent Applications */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lamaran Terbaru</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-muted-foreground mb-4 text-sm">
-            Total lamaran: {applications.length}
-          </div>
-          {applications.length === 0 ? (
-            <div className="text-muted-foreground py-8 text-center">
-              <Users className="mx-auto mb-4 h-12 w-12 opacity-50" />
-              <p>Belum ada lamaran masuk</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {applications
-                .sort(
-                  (a, b) =>
-                    new Date(b.apply_date).getTime() -
-                    new Date(a.apply_date).getTime()
-                )
-                .slice(0, 10)
-                .map((application) => (
-                  <div
-                    key={application.id}
-                    className="hover:bg-muted/50 flex items-start gap-4 rounded-lg border p-4 transition-colors"
-                  >
-                    {/* Applicant Avatar */}
-                    <div className="flex-shrink-0">
-                      {application.society?.user?.image ? (
-                        <Image
-                          src={application.society.user.image}
-                          alt={application.society.name ?? "Applicant"}
-                          width={48}
-                          height={48}
-                          className="h-12 w-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-                          <Users className="text-primary h-6 w-6" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm truncate">
+                              {application.society?.name ?? "Unknown"}
+                            </p>
+                            <p className="text-xs text-gray-600 truncate">
+                              {application.position?.position_name ??
+                                "Unknown Position"}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge
+                                className={`text-xs ${
+                                  application.status === "PENDING"
+                                    ? "bg-orange-100 text-orange-700"
+                                    : application.status === "ACCEPTED"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {application.status === "PENDING"
+                                  ? "Pending"
+                                  : application.status === "ACCEPTED"
+                                  ? "Terima"
+                                  : "Tolak"}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Application Info */}
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold">
-                          {application.society?.name ?? "Unknown Applicant"}
-                        </p>
                         {application.status === "PENDING" && (
-                          <Badge
-                            variant="outline"
-                            className="border-yellow-200 bg-yellow-50 text-yellow-700"
-                          >
-                            <Clock className="mr-1 h-3 w-3" />
-                            Menunggu
-                          </Badge>
+                          <div className="flex gap-1 mt-3 pt-3 border-t border-gray-200">
+                            <Button
+                              size="sm"
+                              className="flex-1 h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() =>
+                                handleStatusUpdate(application.id, "ACCEPTED")
+                              }
+                            >
+                              <CheckCircle className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="flex-1 h-7 text-xs bg-red-600 hover:bg-red-700 text-white"
+                              onClick={() =>
+                                handleStatusUpdate(application.id, "REJECTED")
+                              }
+                            >
+                              <XCircle className="h-3 w-3" />
+                            </Button>
+                          </div>
                         )}
-                        {application.status === "ACCEPTED" && (
-                          <Badge
-                            variant="outline"
-                            className="border-green-200 bg-green-50 text-green-700"
-                          >
-                            <CheckCircle className="mr-1 h-3 w-3" />
-                            Diterima
-                          </Badge>
-                        )}
-                        {application.status === "REJECTED" && (
-                          <Badge
-                            variant="outline"
-                            className="border-red-200 bg-red-50 text-red-700"
-                          >
-                            <XCircle className="mr-1 h-3 w-3" />
-                            Ditolak
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-muted-foreground text-sm">
-                        Melamar sebagai:{" "}
-                        <span className="font-medium">
-                          {application.position?.position_name ??
-                            "Unknown Position"}
-                        </span>
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        {new Date(application.apply_date).toLocaleDateString(
-                          "id-ID",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}
-                      </p>
-                    </div>
-
-                    {/* Action Buttons */}
-                    {application.status === "PENDING" && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-green-600 text-green-600 hover:bg-green-50"
-                          onClick={() =>
-                            handleStatusUpdate(application.id, "ACCEPTED")
-                          }
-                        >
-                          <CheckCircle className="mr-1 h-4 w-4" />
-                          Terima
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-red-600 text-red-600 hover:bg-red-50"
-                          onClick={() =>
-                            handleStatusUpdate(application.id, "REJECTED")
-                          }
-                        >
-                          <XCircle className="mr-1 h-4 w-4" />
-                          Tolak
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

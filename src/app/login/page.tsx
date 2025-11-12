@@ -35,19 +35,16 @@ export default function LoginPage() {
     try {
       const response = await login(formData.email, formData.password);
 
-      // Check if response has data and user
       if (!response.data?.user) {
         throw new Error("Login failed: Invalid response from server");
       }
 
-      // Get user from response - now TypeScript knows it's not undefined
       const loggedInUser = response.data.user;
 
       toast.success("Login Berhasil!", {
         description: `Selamat datang kembali, ${loggedInUser.name}!`,
       });
 
-      // Redirect based on role
       if (loggedInUser.role === "Society") {
         router.push("/jobseeker/jobs");
       } else if (loggedInUser.role === "HRD") {
@@ -67,23 +64,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-orange-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-2xl border-0">
+        <CardHeader className="text-center bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 text-white rounded-t-lg">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-              <Briefcase className="h-6 w-6 text-primary-foreground" />
+            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center shadow-lg">
+              <Briefcase className="h-8 w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Masuk ke Kerjain</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold">Masuk ke Kerjain</CardTitle>
+          <CardDescription className="text-blue-100 font-semibold">
             Masukkan email dan password Anda untuk melanjutkan
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+        <CardContent className="pt-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-3">
+              <Label htmlFor="email" className="font-bold text-gray-700">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -93,10 +92,13 @@ export default function LoginPage() {
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
+                className="border-2 border-blue-500 focus:border-blue-500 focus:ring-blue-400 font-semibold"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-3">
+              <Label htmlFor="password" className="font-bold text-gray-700">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -106,17 +108,24 @@ export default function LoginPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
+                className="border-2 border-green-200 focus:border-green-500 focus:ring-green-400 font-semibold"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 font-bold text-lg py-6 text-white shadow-lg"
+              disabled={loading}
+            >
               {loading ? "Memproses..." : "Masuk"}
             </Button>
           </form>
-          <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Belum punya akun? </span>
+          <div className="mt-8 text-center text-sm">
+            <span className="text-gray-600 font-semibold">
+              Belum punya akun?{" "}
+            </span>
             <Link
               href="/register"
-              className="text-primary hover:underline font-medium"
+              className="text-green-600 hover:text-green-700 font-bold hover:underline"
             >
               Daftar sekarang
             </Link>
