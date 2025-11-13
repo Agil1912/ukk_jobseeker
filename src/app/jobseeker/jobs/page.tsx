@@ -12,9 +12,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { jobSeekerService } from "@/lib/services/jobseeker.service";
 import { toast } from "sonner";
-import { Search, MapPin, Building2, Calendar, Briefcase } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Building2,
+  Calendar,
+  Briefcase,
+  Filter,
+} from "lucide-react";
 import type { AvailablePosition } from "@/lib/api";
 
 export default function JobsPage() {
@@ -22,6 +36,7 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<AvailablePosition[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [periodFilter, setPeriodFilter] = useState("all");
 
   useEffect(() => {
     loadJobs();
@@ -30,6 +45,7 @@ export default function JobsPage() {
   const loadJobs = async () => {
     try {
       const data = await jobSeekerService.getJobs();
+      console.log("Job data:", data); // Debug: cek struktur data
       setJobs(data);
     } catch (error) {
       toast.error("Gagal memuat lowongan kerja");
@@ -46,9 +62,39 @@ export default function JobsPage() {
 
     const now = new Date();
     const endDate = new Date(job.submission_end_date);
+    const startDate = new Date(job.submission_start_date);
     const isOpen = endDate >= now;
 
-    return matchesSearch && isOpen;
+    // Filter berdasarkan periode
+    let matchesPeriod = true;
+    if (periodFilter !== "all") {
+      const daysUntilEnd = Math.ceil(
+        (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      switch (periodFilter) {
+        case "today":
+          matchesPeriod = daysUntilEnd === 0;
+          break;
+        case "week":
+          matchesPeriod = daysUntilEnd <= 7 && daysUntilEnd >= 0;
+          break;
+        case "month":
+          matchesPeriod = daysUntilEnd <= 30 && daysUntilEnd >= 0;
+          break;
+        case "closing-soon":
+          matchesPeriod = daysUntilEnd <= 3 && daysUntilEnd >= 0;
+          break;
+        case "new":
+          const daysSinceStart = Math.ceil(
+            (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          matchesPeriod = daysSinceStart <= 7;
+          break;
+      }
+    }
+
+    return matchesSearch && isOpen && matchesPeriod;
   });
 
   const handleApply = async (jobId: string) => {
@@ -89,24 +135,61 @@ export default function JobsPage() {
           {/* Search Card */}
           <Card className="border-2 border-orange-300 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="pt-6 bg-gradient-to-r from-orange-50 to-orange-100">
-              <div className="relative  bg-gradient-to-r from-orange-50 to-orange-100">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-600 font-bold" />
-                <Input
-                  placeholder="Cari posisi, perusahaan, atau deskripsi..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-2 border-orange-400 focus:border-orange-600  bg-gradient-to-r from-orange-50 to-orange-100 font-semibold text-black py-6"
-                />
+              <div className="space-y-4">
+                <div className="relative bg-gradient-to-r from-orange-50 to-orange-100">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-600 font-bold" />
+                  <Input
+                    placeholder="Cari posisi, perusahaan, atau deskripsi..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-2 border-orange-400 focus:border-orange-600 bg-gradient-to-r from-orange-50 to-orange-100 font-semibold text-black py-6"
+                  />
+                </div>
+
+                {/* Filter Periode */}
+                <div className="flex items-center gap-3">
+                  <Filter className="h-5 w-5 text-orange-600 font-bold" />
+                  <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                    <SelectTrigger className="w-full md:w-64 border-2 border-orange-400 focus:border-orange-600 bg-white text-gray-600 font-semibold">
+                      <SelectValue placeholder="Filter berdasarkan periode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Periode</SelectItem>
+                      <SelectItem value="new">
+                        Lowongan Baru (7 hari terakhir)
+                      </SelectItem>
+                      <SelectItem value="closing-soon">
+                        Segera Ditutup (3 hari)
+                      </SelectItem>
+                      <SelectItem value="today">Berakhir Hari Ini</SelectItem>
+                      <SelectItem value="week">Berakhir Minggu Ini</SelectItem>
+                      <SelectItem value="month">Berakhir Bulan Ini</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Results Count */}
-          <div className="flex items-center justify-between bg-green-100 rounded-lg p-4 border-2 border-green-400">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-green-100 rounded-lg p-4 border-2 border-green-400">
             <p className="text-base font-bold text-black">
               Menampilkan {filteredJobs.length} lowongan{" "}
-              {searchTerm ? "yang sesuai" : ""}
+              {searchTerm || periodFilter !== "all" ? "yang sesuai" : ""}
             </p>
+            {(searchTerm || periodFilter !== "all") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setPeriodFilter("all");
+                }}
+                className="bg-white border-green-500 text-green-700 hover:bg-green-50 font-bold"
+              >
+                Reset Filter
+              </Button>
+            )}
           </div>
 
           {/* No Results */}
@@ -126,7 +209,7 @@ export default function JobsPage() {
                   key={job.id}
                   className="border-2 border-blue-300 hover:shadow-xl transition-all hover:border-blue-500 bg-white overflow-hidden"
                 >
-                  <div className="h-1  bg-blue-600"></div>
+                  <div className="h-1 bg-blue-600"></div>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -141,7 +224,7 @@ export default function JobsPage() {
                         <CardTitle className="text-2xl font-black text-black mb-3">
                           {job.position_name}
                         </CardTitle>
-                        <div className="flex flex-wrap gap-4 text-sm">
+                        <div className="flex flex-wrap gap-4 text-sm mb-3">
                           <div className="flex items-center gap-2 font-bold text-black">
                             <Building2 className="h-5 w-5 text-blue-600" />
                             {job.company?.name || "Perusahaan"}
@@ -152,12 +235,14 @@ export default function JobsPage() {
                               {job.company.address}
                             </div>
                           )}
-                          {job.salary && (
-                            <div className="flex items-center gap-2 font-bold text-black">
-                              <span className="text-xl">💰</span>
-                              Rp {job.salary.toLocaleString("id-ID")}
-                            </div>
-                          )}
+                        </div>
+                        <div className="bg-green-100 border-2 border-green-400 rounded-lg p-3 inline-flex items-center gap-2">
+                          <span className="text-2xl">💰</span>
+                          <span className="font-black text-green-800 text-lg">
+                            {job.salary && job.salary > 0
+                              ? `Rp ${job.salary.toLocaleString("id-ID")}`
+                              : "Gaji Kompetitif"}
+                          </span>
                         </div>
                       </div>
                       <Button
